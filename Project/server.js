@@ -1,10 +1,29 @@
 var express = require("express");
 var app = express(); 
+var itemList = []; //store items 
+
+// enable CORS
+app.use(function(req, res, next) {res.header("Access-Control-Allow-Origin", "*");res.header("Access-Control-Allow-Methods", "GET, PUT, POST, PATCH, DELETE");res.header("Access-Control-Allow-Headers", "Origin, X-Rquested-With, Content-Type, Accept");next();
+});
+
+// config body- parse
+
+var bparser = require("body-parser");
+app.use(bparser.json());
 
 
+//****************************** */
+
+app.use(express.static(__dirname + '/public'))
+
+var ejs= require('ejs');
+app.set('views', __dirname + '/public');
+app.engine('html', ejs.renderFile);
+app.set('view engine', ejs);
+
+///*********************** */
 app.get('/', (req, res) =>{
-   console.log("Someone wants the root page");
-   res.send("Hello my friend!");
+   res.render('catalog.html');
 });
 
 app.get('/contact', (req, res) =>{
@@ -12,7 +31,7 @@ app.get('/contact', (req, res) =>{
 });
 
 app.get('/aboutme', (req, res) => {
-     res.send("<h1 style='color:red;'> Ivonne Ocampo </h1>");
+     res.render('about.html');
 });
 
 app.get('/exc/:message', (req, res) => {
@@ -31,8 +50,23 @@ app.get('/exc/:message', (req, res) => {
         }
    }
    
-   res.status(202);
+   res.status(201);
    res.send(vowels);
+});
+
+app.post('/api/items', (req, res) => {
+   console.log("clients wants to store items");
+  
+    var item = req.body;
+    item.id = itemList.length + 1; // consecutive id
+    itemList.push(item);
+
+   res.status(201);
+   res.json(item);
+});
+
+app.get('/api/items', (req,res) => {
+     res.json(itemList);
 });
 
 app.listen(8080, function(){
